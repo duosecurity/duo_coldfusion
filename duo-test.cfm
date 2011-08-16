@@ -1,0 +1,103 @@
+<cfset IKEY = "DIXXXXXXXXXXXXXXXXXX">
+<cfset SKEY = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef">
+<cfset AKEY = "useacustomerprovidedapplicationsecretkey">
+
+<cfset USER = "testuser">
+
+<!--- Dummy response signatures --->
+<cfset INVALID_RESPONSE = "AUTH|INVALID|SIG">
+<cfset EXPIRED_RESPONSE = "AUTH|dGVzdHVzZXJ8RElYWFhYWFhYWFhYWFhYWFhYWFh8MTMwMDE1Nzg3NA==|cb8f4d60ec7c261394cd5ee5a17e46ca7440d702">
+<cfset FUTURE_RESPONSE = "AUTH|dGVzdHVzZXJ8RElYWFhYWFhYWFhYWFhYWFhYWFh8MTYxNTcyNzI0Mw==|d20ad0d1e62d84b00a3e74ec201a5917e77b6aef">
+
+<h2>Test signRequest()</h2>
+<cfset DuoWeb = CreateObject("component", "DuoWeb")>
+
+<cfset request_sig = DuoWeb.signRequest(IKEY, SKEY, AKEY, USER)>
+<cfif NOT Len(request_sig)>
+	<p>FAIL request_sig was NULL</p>
+<cfelse>
+	<p>PASS request_sig was not NULL</p>
+</cfif>
+
+<cfset request_sig = DuoWeb.signRequest(IKEY, SKEY, AKEY, "")>
+<cfif request_sig IS DuoWeb.ERR_USER>
+	<p>PASS request_sig is ERR_USER</p>
+<cfelse>
+	<p>FAIL request_sig is not ERR_USER it is: <cfoutput>#request_sig#</cfoutput></p>
+</cfif>
+
+
+<cfset request_sig = DuoWeb.signRequest("invalid", SKEY, AKEY, USER)>
+<cfif request_sig IS DuoWEb.ERR_IKEY>
+	<p>PASS request_sig is ERR_IKEY</p>
+<cfelse>
+	<p>FAIL request_sig is not ERR_IKEY it is:<cfoutput>#request_sig#</cfoutput></p>
+</cfif>
+
+
+<cfset request_sig = DuoWeb.signRequest(IKEY, "invalid", AKEY, USER)>
+<cfif request_sig IS DuoWeb.ERR_SKEY>
+	<p>PASS request_sig is ERR_SKEY</p>
+<cfelsE>
+	<p>FAIL request_sig is not ERR_SKEY it is: <cfoutput>#request_sig#</cfoutput></p>
+</cfif>
+
+
+<cfset request_sig = DuoWeb.signRequest(IKEY, SKEY, "invalid", USER)>
+<cfif request_sig IS DuoWeb.ERR_AKEY>
+	<p>PASS request_sig is ERR_AKEY</p>
+<cfelse>
+	<p>FAIL request_sig is not ERR_AKEY</p>
+</cfif>
+
+<h2>Test verifyResponse()</h2>
+
+
+
+<cfset request_sig = DuoWeb.signRequest(IKEY, SKEY, AKEY, USER)>
+
+<cfset valid_app_sig = ListGetAt(request_sig, 2, ":")>
+
+
+<cfset future_user = DuoWeb.verifyResponse(IKEY, SKEY, AKEY, FUTURE_RESPONSE & ":" & valid_app_sig)>
+<cfif future_user IS USER>
+	<p>PASS future_user</p>
+<cfelse>
+	<p>FAIL future_user is: <cfoutput>#future_user#</cfoutput></p>
+</cfif>
+
+<cfset request_sig = DuoWeb.signRequest(IKEY, SKEY, "1234567890123456789012345678901234567890", USER)>
+<cfset invalid_app_sig = ListGetAt(request_sig, 2, ":")>
+
+<cfset invalid_user = DuoWeb.verifyResponse(IKEY, SKEY, AKEY, INVALID_RESPONSE & ":" & valid_app_sig)>
+<cfif NOT Len(invalid_user)>
+	<p>PASS invalid_user</p>
+<cfelse>
+	<p>FAIL invalid_user</p>
+</cfif>
+
+
+<cfset expired_user = DuoWeb.verifyResponse(IKEY, SKEY, AKEY, EXPIRED_RESPONSE & ":" & valid_app_sig)>
+<cfif NOT Len(expired_user)>
+	<p>PASS expired_user</p>
+<cfelse>
+	<p>FAIL expired_user</p>
+</cfif>
+
+
+<cfset future_user = DuoWeb.verifyResponse(IKEY, SKEY, AKEY, FUTURE_RESPONSE & ":" & invalid_app_sig)>
+<cfif NOT Len(future_user)>
+	<p>PASS future_user invalid_app_sig</p>
+<cfelse>
+	<p>FAIL future_user invalid_app_sig</p>
+</cfif>
+
+
+<h2>Test hmacSign</h2>
+<!--- test from rfc 2202 --->
+<cfset result = DuoWeb.hmacSign("Jefe", "what do ya want for nothing?")>
+<cfif result IS NOT "effcdf6ae5eb2fa2d27416d5f184df9c259a7c79">
+	<p>FAIL hmac result was <cfoutput>#result#</cfoutput></p>
+<cfelse>
+	<p>PASS hmac working properly</p>
+</cfif>
