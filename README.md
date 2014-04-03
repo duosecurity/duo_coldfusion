@@ -18,17 +18,12 @@ What's here:
 * `DuoWeb.cfc` - Duo ColdFusion SDK to be integrated with your web application
 * `DuoTest.cfm` -  Unit tests for our SDK
 
+Thanks to Pete Freitag and Foundeo Inc. (foundeo.com) for writing the
+initial code.
+
 # Usage
 
 Developer documentation: <http://www.duosecurity.com/docs/duoweb>
-
-# Support
-
-Questions? Join the duo_web mailing list at
-<http://groups.google.com/group/duo_web>
-
-Report any bugs, feature requests, etc. to us directly:
-<https://github.com/duosecurity/duo_coldfusion/issues>
 
 Have fun!
 
