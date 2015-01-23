@@ -26,6 +26,9 @@
 		<cfif NOT Len(arguments.username)>
 			<cfreturn this.ERR_USER>
 		</cfif>
+		<cfif Find("|", arguments.username) NEQ 0>
+			<cfreturn this.ERR_USER>
+		</cfif>
 		<cfif NOT Len(arguments.iKey) OR Len(arguments.iKey) NEQ variables.IKEY_LEN>
 			<cfreturn this.ERR_IKEY>
 		</cfif>
@@ -61,8 +64,8 @@
 			</cfif>
 			<cfset auth_sig = ListFirst(arguments.sig_response, ":")>
 			<cfset app_sig = ListLast(arguments.sig_response, ":")>
-			<cfset auth_user = parseVals(arguments.sKey, auth_sig, variables.AUTH_PREFIX)>
-			<cfset app_user = parseVals(arguments.aKey, app_sig, variables.APP_PREFIX)>
+			<cfset auth_user = parseVals(arguments.sKey, auth_sig, variables.AUTH_PREFIX, iKey)>
+			<cfset app_user = parseVals(arguments.aKey, app_sig, variables.APP_PREFIX, iKey)>
 			<cfif NOT Len(auth_user) OR NOT Len(app_user) OR auth_user IS NOT app_user>
 				<cfreturn "">
 			</cfif>
@@ -91,10 +94,16 @@
 		<cfargument name="key" type="string">
 		<cfargument name="value" type="string">
 		<cfargument name="prefix" type="string">
+		<cfargument name="iKey" type="string">
 		<cfset var ts = Left(GetTickCount(), Len(GetTickCount())-3)>
+
+		<cfif ListLen(arguments.value, "|") NEQ 3>
+		      <cfreturn "">
+		</cfif>
 		<cfset var u_prefix = ListFirst(arguments.value, "|")>
 		<cfset var u_b64 = ListGetAt(arguments.value, 2, "|")>
 		<cfset var u_sig = ListGetAt(arguments.value, 3, "|")>
+
 		<cfset var sig = hmacSign(arguments.key, u_prefix & "|" & u_b64)>
 		<cfset var cookie = "">
 		<cfset var username = "">
@@ -112,12 +121,18 @@
 				<cfreturn "">
 			</cfcatch>
 		</cftry>
-		<cfif ListLen(cookie, "|") LT 3>
+		<cfif ListLen(cookie, "|") NEQ 3>
 			<cfreturn "">
 		</cfif>
 		
 		<cfset username = Trim(ListFirst(cookie, "|"))>
+		<cfset u_iKey = Trim(ListGetAt(cookie, 2, "|"))>
 		<cfset expire = Trim(ListGetAt(cookie, 3, "|"))>
+
+		<cfif u_iKey NEQ iKey>
+			<cfreturn "">
+		</cfif>
+
 		<cfif ts GTE Val(expire)>
 			<cfreturn "">
 		</cfif>
@@ -126,8 +141,8 @@
 	
 	
 	<cffunction name="hmacSign" returntype="string" access="public" output="false">
-   		<cfargument name="key" type="string" required="true" />
-   		<cfargument name="message" type="string" required="true" />
+		<cfargument name="key" type="string" required="true" />
+		<cfargument name="message" type="string" required="true" />
 		<cfset var keySpec = createObject("java","javax.crypto.spec.SecretKeySpec") />
 		<cfset var mac = createObject("java","javax.crypto.Mac") />
 		<cfset var keyBytes = JavaCast("string", arguments.key).getBytes()>

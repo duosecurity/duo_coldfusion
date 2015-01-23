@@ -1,4 +1,5 @@
 <cfset IKEY = "DIXXXXXXXXXXXXXXXXXX">
+<cfset WRONG_IKEY = "DIXXXXXXXXXXXXXXXXXY">
 <cfset SKEY = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef">
 <cfset AKEY = "useacustomerprovidedapplicationsecretkey">
 
@@ -8,6 +9,8 @@
 <cfset INVALID_RESPONSE = "AUTH|INVALID|SIG">
 <cfset EXPIRED_RESPONSE = "AUTH|dGVzdHVzZXJ8RElYWFhYWFhYWFhYWFhYWFhYWFh8MTMwMDE1Nzg3NA==|cb8f4d60ec7c261394cd5ee5a17e46ca7440d702">
 <cfset FUTURE_RESPONSE = "AUTH|dGVzdHVzZXJ8RElYWFhYWFhYWFhYWFhYWFhYWFh8MTYxNTcyNzI0Mw==|d20ad0d1e62d84b00a3e74ec201a5917e77b6aef">
+<cfset WRONG_PARAMS_RESPONSE = "AUTH|dGVzdHVzZXJ8RElYWFhYWFhYWFhYWFhYWFhYWFh8MTYxNTcyNzI0M3xpbnZhbGlkZXh0cmFkYXRh|6cdbec0fbfa0d3f335c76b0786a4a18eac6cdca7">
+<cfset WRONG_PARAMS_APP = "APP|dGVzdHVzZXJ8RElYWFhYWFhYWFhYWFhYWFhYWFh8MTYxNTcyNzI0M3xpbnZhbGlkZXh0cmFkYXRh|7c2065ea122d028b03ef0295a4b4c5521823b9b5">
 
 <h2>Test signRequest()</h2>
 <cfset DuoWeb = CreateObject("component", "DuoWeb")>
@@ -26,6 +29,12 @@
 	<p>FAIL request_sig is not ERR_USER it is: <cfoutput>#request_sig#</cfoutput></p>
 </cfif>
 
+<cfset request_sig = DuoWeb.signRequest(IKEY, SKEY, AKEY, "in|valid")>
+<cfif request_sig IS DuoWeb.ERR_USER>
+	<p>PASS request_sig is ERR_USER</p>
+<cfelse>
+	<p>FAIL request_sig is not ERR_USER it is: <cfoutput>#request_sig#</cfoutput></p>
+</cfif>
 
 <cfset request_sig = DuoWeb.signRequest("invalid", SKEY, AKEY, USER)>
 <cfif request_sig IS DuoWEb.ERR_IKEY>
@@ -90,6 +99,27 @@
 	<p>PASS future_user invalid_app_sig</p>
 <cfelse>
 	<p>FAIL future_user invalid_app_sig</p>
+</cfif>
+
+<cfset future_user = DuoWeb.verifyResponse(IKEY, SKEY, AKEY, WRONG_PARAMS_RESPONSE & ":" & valid_app_sig)>
+<cfif NOT Len(future_user)>
+	<p>PASS future_user invalid_response_format</p>
+<cfelse>
+	<p>FAIL future_user invalid_response_format</p>
+</cfif>
+
+<cfset future_user = DuoWeb.verifyResponse(IKEY, SKEY, AKEY, FUTURE_RESPONSE & ":" & WRONG_PARAMS_APP)>
+<cfif NOT Len(future_user)>
+	<p>PASS future_user invalid_app_format</p>
+<cfelse>
+	<p>FAIL future_user invalid_app_format</p>
+</cfif>
+
+<cfset future_user = DuoWeb.verifyResponse(WRONG_IKEY, SKEY, AKEY, FUTURE_RESPONSE & ":" & valid_app_sig)>
+<cfif NOT Len(future_user)>
+	<p>PASS future_user wrong_ikey</p>
+<cfelse>
+	<p>FAIL future_user wrong_ikey</p>
 </cfif>
 
 
