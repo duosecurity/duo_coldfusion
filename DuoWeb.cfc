@@ -95,19 +95,24 @@
 		<cfargument name="value" type="string">
 		<cfargument name="prefix" type="string">
 		<cfargument name="iKey" type="string">
+
 		<cfset var ts = Left(GetTickCount(), Len(GetTickCount())-3)>
-
-		<cfif ListLen(arguments.value, "|") NEQ 3>
-		      <cfreturn "">
-		</cfif>
-		<cfset var u_prefix = ListFirst(arguments.value, "|")>
-		<cfset var u_b64 = ListGetAt(arguments.value, 2, "|")>
-		<cfset var u_sig = ListGetAt(arguments.value, 3, "|")>
-
-		<cfset var sig = hmacSign(arguments.key, u_prefix & "|" & u_b64)>
+		<cfset var u_prefix = "">
+		<cfset var u_b64 = "">
+		<cfset var u_sig = "">
+		<cfset var sig = "">
 		<cfset var cookie = "">
 		<cfset var username = "">
 		<cfset var expire = "">
+
+		<cfif ListLen(arguments.value, "|") NEQ 3>
+			<cfreturn "">
+		</cfif>
+		<cfset u_prefix = ListFirst(arguments.value, "|")>
+		<cfset u_b64 = ListGetAt(arguments.value, 2, "|")>
+		<cfset u_sig = ListGetAt(arguments.value, 3, "|")>
+
+		<cfset sig = hmacSign(arguments.key, u_prefix & "|" & u_b64)>
 		<cfif hmacSign(arguments.key, LCase(sig)) IS NOT hmacSign(arguments.key, LCase(u_sig))>
 			<cfreturn "">
 		</cfif>
