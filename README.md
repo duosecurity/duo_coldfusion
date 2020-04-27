@@ -1,5 +1,10 @@
 # Overview
 
+[![Issues](https://img.shields.io/github/issues/duosecurity/duo_coldfusion)](https://github.com/duosecurity/duo_coldfusion/issues)
+[![Forks](https://img.shields.io/github/forks/duosecurity/duo_coldfusion)](https://github.com/duosecurity/duo_coldfusion/network/members)
+[![Stars](https://img.shields.io/github/stars/duosecurity/duo_coldfusion)](https://github.com/duosecurity/duo_coldfusion/stargazers)
+[![License](https://img.shields.io/badge/License-View%20License-orange)](https://github.com/duosecurity/duo_coldfusion/blob/master/LICENSE)
+
 **duo_coldfusion** - Duo two-factor authentication for ColdFusion web applications
 
 What's here:
