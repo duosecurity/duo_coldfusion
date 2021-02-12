@@ -85,9 +85,9 @@
 		<cfset var ts = Left(GetTickCount(), Len(GetTickCount())-3)>
 		<cfset var expire_ts = ts + arguments.expire>
 		<cfset var value = arguments.username & "|" & arguments.ikey & "|" & expire_ts>
-		<cfset var cookie = arguments.prefix & "|" & ToBase64(value)>
-		<cfset var sig = hmacSign(arguments.key, cookie)>
-		<cfreturn cookie & "|" & sig>
+		<cfset var Mycookie = arguments.prefix & "|" & ToBase64(value)>
+		<cfset var sig = hmacSign(arguments.key, Mycookie)>
+		<cfreturn Mycookie & "|" & sig>
 	</cffunction>
 	
 	<cffunction name="parseVals" returntype="string" access="private" output="false">
@@ -101,7 +101,7 @@
 		<cfset var u_b64 = "">
 		<cfset var u_sig = "">
 		<cfset var sig = "">
-		<cfset var cookie = "">
+		<cfset var Mycookie = "">
 		<cfset var username = "">
 		<cfset var expire = "">
 
@@ -120,18 +120,18 @@
 			<cfreturn "">
 		</cfif>
 		<cftry>
-			<cfset cookie = ToString(ToBinary(u_b64))>
+			<cfset Mycookie = ToString(ToBinary(u_b64))>
 			<cfcatch>
 				<!--- toBinary throws exception if not base64 string --->
 				<cfreturn "">
 			</cfcatch>
 		</cftry>
-		<cfif ListLen(cookie, "|") NEQ 3>
+		<cfif ListLen(Mycookie, "|") NEQ 3>
 			<cfreturn "">
 		</cfif>
 		
-		<cfset username = Trim(ListFirst(cookie, "|"))>
-		<cfset u_iKey = Trim(ListGetAt(cookie, 2, "|"))>
+		<cfset username = Trim(ListFirst(Mycookie, "|"))>
+		<cfset u_iKey = Trim(ListGetAt(Mycookie, 2, "|"))>
 		<cfset expire = Trim(ListGetAt(cookie, 3, "|"))>
 
 		<cfif u_iKey NEQ iKey>
