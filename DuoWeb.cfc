@@ -132,7 +132,7 @@
 		
 		<cfset username = Trim(ListFirst(Mycookie, "|"))>
 		<cfset u_iKey = Trim(ListGetAt(Mycookie, 2, "|"))>
-		<cfset expire = Trim(ListGetAt(cookie, 3, "|"))>
+		<cfset expire = Trim(ListGetAt(Mycookie, 3, "|"))>
 
 		<cfif u_iKey NEQ iKey>
 			<cfreturn "">
